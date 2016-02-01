@@ -17,6 +17,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
      <script src="/playground/scripts/canvas.js"> </script>
+     <script src="/playground/scripts/programeditor.js"> </script>
      <script src="/playground/scripts/startup.js"> </script>
   </head>
   <body>
@@ -36,17 +37,19 @@
       </div>
     </nav>
 
-    <div class="container">
+    <div class="container" >
      <div class="page-header">
         <h3>Robot PlayGround</h3>
         <p>using the provided commands to write your own program and control the robot</p>
       </div>
 <!-- canvas and command -->
 <div class="row">
-  <div class="col-xs-12 col-md-6">
+  <div class="col-xs-12 col-sm-6 col-md-6">
    <div id = "robot-playground"></div>
   </div>
-  <div class="col-xs-12 col-md-6">program</div>
+  <div class="col-xs-12 col-sm-6 col-md-6">
+  <div id = "program-editor"></div>
+  </div>
 </div>
     </div>
 

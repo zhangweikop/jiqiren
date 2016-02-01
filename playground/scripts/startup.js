@@ -1,6 +1,9 @@
 //viewcontroller and view are view realted
-function ViewController(){
-	this.view = html5canvasView(6, 8, 2, 1);
+function RobotMonitorViewController(){
+	this.view = robotMonitorView('#robot-playground', 6, 8, 2, 1);
+}
+function ProgramWindowViewController(){
+	this.view = programWindowView('#program-editor');
 }
 
 var WebApplication = WebApplication||{};
@@ -12,8 +15,8 @@ function ExecutionService(){
 }
 
 
-function html5canvasView(r, c, x, y) {
-	var rootDom = $('#robot-playground')[0];
+function robotMonitorView(root, r, c, x, y) {
+	var rootDom = $(root)[0];
  	var view = makeMyBoardView(rootDom, r, c);
 	var classRobotPlaygroundCharacter = 'robot-playground-character';
 	var robotElement = '<div class = "' + classRobotPlaygroundCharacter + '" style = "maxHeight: 100%; height:100%; width: 100%; maxWidth: 100%;">'+
@@ -23,16 +26,22 @@ function html5canvasView(r, c, x, y) {
  	return view;
 }
 
-	//beresponsible for the databinding between the property and the dom element
+function programWindowView(root) {
+	var rootDom = $(root)[0];
+	var view = makeProgramWindowView(rootDom);
+}
 
-html5canvasView.prototype.CreateCharacter = function(){};
-html5canvasView.prototype.MoveCharacter = function(){};
+//beresponsible for the databinding between the property and the dom element
+
+robotMonitorView.prototype.CreateCharacter = function(){};
+robotMonitorView.prototype.MoveCharacter = function(){};
 
 $(document).ready(function(){
-	 var controller = new ViewController();
+	 var controller = new RobotMonitorViewController();
+	 var programController = new ProgramWindowViewController();
 	 WebApplication.boardController = controller;
 	setTimeout(function(){
-		console.log(WebApplication.boardController.view.MoveElementInsideBoard(2,1,2,3, 'robot',1000));
+		console.log(WebApplication.boardController.view.MoveElementInsideBoard(2, 3, 'robot',1000));
 	}, 1000); 
 })
 

@@ -15,8 +15,9 @@ function makeMyBoardView(rootDom, rows, columns){
 		    board[i][j] = {};
 		  }
 		}
+		rootContainer.css('width', rootContainer.parent().width());
+	
 		for(var i = 0 ; i < height; i++) { 
-			rootContainer.css('width', rootContainer.parent().width());
 			rootContainer.append('<div class = "' + classRobotPlaygroundRow + '"></div>');
 		}
 		rootContainer.children().each(function(rowIndex) {
@@ -46,7 +47,7 @@ function makeMyBoardView(rootDom, rows, columns){
 		});
 		
 
- 	    $(window).on("resize", resizeThrottler);
+ 	    $(self).on("resize", resizeThrottler);
 
 	    var resizeTimeout;
 	    function resizeThrottler() {
@@ -86,11 +87,10 @@ function makeMyBoardView(rootDom, rows, columns){
 		return false;
 	}
 
-	function moveElement(x, y, newx, newy, objectName, time) {
+	function moveElement(newx, newy, objectName, time) {
 		if (newx >= columns || newy >= rows) {
 			return false;
 		}
-		var oldContainer = board[x][y];
 		var newContainer = board[newx][newy];
 		var element = boardObjects[objectName];
 		var startPoint = $(element).offset();
