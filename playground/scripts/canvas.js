@@ -47,7 +47,7 @@ function makeMyBoardView(rootDom, rows, columns){
 		});
 		
 
- 	    $(self).on("resize", resizeThrottler);
+ 	    $(window.self).on("resize", resizeThrottler);
 
 	    var resizeTimeout;
 	    function resizeThrottler() {
