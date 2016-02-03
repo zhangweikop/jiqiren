@@ -15,28 +15,24 @@ function makeMyBoardView(rootDom, rows, columns){
 		    board[i][j] = {};
 		  }
 		}
-		rootContainer.css('width', rootContainer.parent().width());
-	
+		 rootContainer.css('width', rootContainer.parent().width());
 		for(var i = 0 ; i < height; i++) { 
-			rootContainer.append('<div class = "' + classRobotPlaygroundRow + '"></div>');
+			rootContainer.append('<div  style = "width:100%" class = "' + classRobotPlaygroundRow + '"></div>');
 		}
 		rootContainer.children().each(function(rowIndex) {
-				var row = $(this);
-			  for (var colIndex = 0; colIndex < width; colIndex++) {
+
+			var row = $(this);
+			for (var colIndex = 0; colIndex < width; colIndex++) {
 		    	var cell = $('<div class = "' + classRobotPlaygroundCell + '"> </div>');
 		    	if(colIndex == 0) {
 		    		cell.append('<div style = "position:absolute">' + (rowIndex + 1) + '</div>');	
 			  	} 
-		    	cell.css( 'width', ( row.width()/width) + 'px' );
-		    	cell.css( 'maxWidth', ( row.width()/width) + 'px' );
-		    	cell.css( 'maxHeight', ( row.width()/width) + 'px' );
-
-		    	//cell.css( 'maxWidth', ( row.width()/ width) + 'px' );
-		    	cell.css( 'height', ( row.width() / width) + 'px' );
-		    	//cell.css( 'maxHeight', ( row.width() / width) + 'px' );
-			    cell.css( 'float', 'left');
-		    	cell.css( 'border', '1px solid #ddd');
-		    	cell.css('background-color', 'white');
+	    		var size= { 
+					   
+	    				'width' : parseInt( row.width()/columns) + 'px',
+	    				'height' : parseInt( row.width() / columns ) + 'px'
+	    		};
+			    cell.css(size);
 		    	row.css( 'maxHeight', ( row.width() / width) + 'px' );
 		    	board[rowIndex][colIndex] = cell[0];
 		    	row.append(cell);
@@ -66,7 +62,12 @@ function makeMyBoardView(rootDom, rows, columns){
 	    	rootContainer.css('width', rootContainer.parent().width());
 	    	rootContainer.children('.' + classRobotPlaygroundRow).each( function(index){
 				var row = $(this);
-				row.children('.' + classRobotPlaygroundCell).css( {'width' : ( row.width()/columns) + 'px', 'height' : ( row.width() / columns ) + 'px'});
+				var size= { 
+		    				'width' : parseInt( row.width()/columns) + 'px',
+		    				'height' : parseInt( row.width() / columns ) + 'px'
+		    			};
+				row.children('.' + classRobotPlaygroundCell).css(size);
+
 	    	})
 	  	}
 	}
