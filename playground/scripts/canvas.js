@@ -1,4 +1,3 @@
-
 function makeMyBoardView(rootDom, rows, columns){
 	var classRobotPlaygroundRow = 'robot-playground-row';
 	var classRobotPlaygroundCell = 'robot-playground-cell';
@@ -88,7 +87,7 @@ function makeMyBoardView(rootDom, rows, columns){
 		return false;
 	}
 
-	function moveElement(newx, newy, objectName, time) {
+	function moveElement(newx, newy, objectName, time, cb) {
 		if (newx >= columns || newy >= rows) {
 			return false;
 		}
@@ -118,6 +117,9 @@ function makeMyBoardView(rootDom, rows, columns){
 			} else {
 				$(element).css({transform: 'none'});
 				$(element).appendTo($(newContainer));
+				if(cb) {
+					cb();
+				}
 			}			
 		}
 		translate(0, 0, xOffset, yOffset);

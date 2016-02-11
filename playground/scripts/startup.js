@@ -1,21 +1,9 @@
 //viewcontroller and view are view realted
-function RobotMonitorViewController(){
-	this.view = robotMonitorView('#robot-playground', 6, 8, 2, 1);
-}
-function ProgramWindowViewController(){
-	this.view = programWindowView('#program-editor');
-}
-
-var WebApplication = WebApplication||{};
-//the service will be used by the controller.the execution service will connect to the execution engine 
-// and send data to each other
-function ExecutionService(){
-	this.engine = (function (){//connect to the existing engine, the simple case is local code simulator 
-	});
-}
-
-
 function robotMonitorView(root, r, c, x, y) {
+	this.x = x;
+	this.y = y;
+	this.r = r;
+	this.c = c;
 	var rootDom = $(root)[0];
  	var view = makeMyBoardView(rootDom, r, c);
 	var classRobotPlaygroundCharacter = 'robot-playground-character';
@@ -23,25 +11,136 @@ function robotMonitorView(root, r, c, x, y) {
 									'<img src="/playground/images/robot.png" style = "maxHeight: 100%; height:100%; width: 100%; maxWidth: 100%;">'
 									+'</div>';
  	view.createElementAtBoard(x, y, 'robot', robotElement);
- 	return view;
-}
-
-function programWindowView(root) {
-	var rootDom = $(root)[0];
-	var view = makeProgramWindowView(rootDom);
+ 	this.view = view;
 }
 
 //beresponsible for the databinding between the property and the dom element
 
 robotMonitorView.prototype.CreateCharacter = function(){};
-robotMonitorView.prototype.MoveCharacter = function(){};
+robotMonitorView.prototype.MoveDown = function(cb){
+	var that = this;
+	if (this.x + 1 < this.c) {
+		this.view.MoveElementInsideBoard(this.x + 1, this.y, 'robot', 1000, function() {
+			that.x++;
+			if (cb) {
+				cb();
+			}
+		});
+	} else {
+		cb();
+	}
+};
+
+robotMonitorView.prototype.MoveUp = function(cb){
+	var that = this;
+	if (this.x - 1 >= 0) {
+		this.view.MoveElementInsideBoard(this.x - 1, this.y, 'robot', 1000, function() {
+			that.x--;
+			if (cb) {
+				cb();
+			}
+		});
+	} else  {
+		cb();
+	}
+};
+
+robotMonitorView.prototype.MoveLeft = function(cb){
+	var that = this;
+	if (this.y - 1 >= 0) {
+		this.view.MoveElementInsideBoard(this.x, this.y - 1,'robot', 1000, function() {
+			that.y--;
+			if (cb) {
+				cb();
+			}
+		});
+	} else {
+		cb();
+	}
+};
+
+robotMonitorView.prototype.MoveRight = function(cb){
+	var that = this;
+	if (this.y + 1 < this.r) {
+		this.view.MoveElementInsideBoard(this.x, this.y + 1,'robot', 1000, function() {
+			that.y++;
+			if (cb) {
+				cb();
+			}
+		});
+	} else  {
+		cb();
+	}
+};
+function RobotMonitorViewController(){
+	this.viewController = new robotMonitorView('#robot-playground', 6, 8, 2, 1);
+	//this.execution = new ExecutionService(this.viewController);
+}
+
+function programWindowView(root, programMenu, programEditor, supportedCommands) {
+	this.rootDom = $(root)[0];
+	this.view = makeProgramWindowView(this.rootDom , programMenu, programEditor, supportedCommands);
+}
+
+function ProgramWindowViewController(executionService){
+	this.programMenu = 'lowlevel-command-gallery';
+	this.programEditor = 'lowlevel-command-editor';
+	this.view = new programWindowView('#program-editor', this.programMenu, this.programEditor, executionService.supportedCommands);
+}
+
+window.WebApplication = window.WebApplication||{};
+//load the command from files
+
+//the service will be used by the controller.the execution service will connect to the execution engine 
+// and send data to each other
+function loadService(programWindowViewController, ExecutionService) {
+	this.rootDom = $('.'+programWindowViewController.programEditor)[0]; 
+	this.programLoader  = new programLoader(ExecutionService.commandCenter , 0, ExecutionService.driver);
+
+	this.load = loadProgramFromDom(this.rootDom, this.programLoader).loadProgram;
+
+}
+function ExecutionService(runtime){
+	//connect to the existing engine, the simple case is local code simulator 
+	
+	var driver = {functions : {}, flowControl: {}};
+	driver.functions.MoveUp = { name: 'MoveUp', function: function (cb) {runtime.MoveUp(cb);}};
+	driver.functions.MoveDown = { name: 'MoveDown', function: function (cb) {runtime.MoveDown(cb);}};
+	driver.functions.MoveLeft = { name: 'MoveLeft', function: function (cb) {runtime.MoveLeft(cb);}};
+	driver.functions.MoveRight = { name: 'MoveRight', function: function (cb) {runtime.MoveRight(cb);}};
+
+	var supportedCommands= [];
+
+	for (var key in driver.functions) {
+		if (driver.functions.hasOwnProperty(key)) {
+			var value = driver.functions[key];
+			if (value.name) {
+				var supportCommand = {name : value.name, function: value.function};
+				supportedCommands.push(supportCommand);
+			}
+		}
+	}
+	this.commandCenter = new commandCenter();
+	this.driver = driver;
+	
+	this.supportedCommands = supportedCommands;
+}
+
 
 $(document).ready(function(){
-	 var controller = new RobotMonitorViewController();
-	 var programController = new ProgramWindowViewController();
-	 WebApplication.boardController = controller;
+	 var robotMonitorViewController = new RobotMonitorViewController();
+	 var localExecutionService = new ExecutionService(robotMonitorViewController.viewController);
+	 var programController = new ProgramWindowViewController(localExecutionService);
+	 var programLoader = new loadService(programController, localExecutionService);
+
+	 WebApplication.boardController = robotMonitorViewController;
+	 WebApplication.programController = programController;
+	 $('#run-button').click(function() {
+	 	programLoader.load();
+	 	localExecutionService.commandCenter.EventLoop();
+	 });
 	setTimeout(function(){
-		console.log(WebApplication.boardController.view.MoveElementInsideBoard(2, 3, 'robot',1000));
+		//console.log(WebApplication.boardController.viewController.view.MoveElementInsideBoard(2, 3, 'robot',1000));
 	}, 1000); 
 })
 

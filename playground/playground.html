@@ -18,6 +18,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
      <script src="/playground/scripts/canvas.js"> </script>
      <script src="/playground/scripts/programeditor.js"> </script>
+     <script src="/playground/scripts/scheduler.js"> </script>
+     <script src="/playground/scripts/loadprogram.js"> </script>
+
      <script src="/playground/scripts/startup.js"> </script>
   </head>
   <body>
@@ -44,10 +47,13 @@
       </div>
 <!-- canvas and command -->
 <div class="row">
+
   <div class="col-xs-12 col-sm-6 col-md-6">
    <div id = "robot-playground"></div>
   </div>
   <div class="col-xs-12 col-sm-6 col-md-6">
+         <button id = "run-button" type="button" class="btn btn-primary-outline">Run</button>
+
   <div id = "program-editor"></div>
   </div>
 </div>
