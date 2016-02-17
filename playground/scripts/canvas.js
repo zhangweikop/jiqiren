@@ -73,7 +73,7 @@ function makeMyBoardView(rootDom, rows, columns){
 
 
 	function createElement(x, y, elementName, element) {
-		var elementContainer = board[x][y];
+		var elementContainer = board[y][x];
 		var newElement;
 		if (!!elementName && !!element) {
 			if (boardObjects.hasOwnProperty(elementName)) {
@@ -91,7 +91,7 @@ function makeMyBoardView(rootDom, rows, columns){
 		if (newx >= columns || newy >= rows) {
 			return false;
 		}
-		var newContainer = board[newx][newy];
+		var newContainer = board[newy][newx];
 		var element = boardObjects[objectName];
 		var startPoint = $(element).offset();
  		var endPoint = $(newContainer).offset();

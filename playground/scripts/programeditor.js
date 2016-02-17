@@ -2,6 +2,7 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 	var rootContainer = $(rootDom);
 	
 	var classKeyword = 'command-item';
+	var blockKeyword = 'command-block';
 	var menduWindow;
 	var editorWindow;
 	function initial() {
@@ -11,19 +12,38 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 	
 		menduWindow = rootContainer.find('.' + programMenu)[0];
 		editorWindow = rootContainer.find('.' + programEditor)[0];
-		editorWindow.dataset.classKeyword = classKeyword;
+		editorWindow.dataset.firstClassKeyword = classKeyword;
+		editorWindow.dataset.blockClassKeyword = blockKeyword;
+
 		//$(menduWindow).css({ });
 		 
 		//$(editorWindow).css({ 'padding': 'initial', 'box-sizing': 'border-box', 'border': '1px solid #ddd','height' : '100%', 'overflow': 'auto'});
 
 		for(var i = 0; i < supportedCommands.length; i++) {
-			var command = '<div class = "'+ classKeyword +'" draggable = "true" style="width:100%">' + '<a class = "command-btn" ><span>'+ supportedCommands[i].name + '</span></a>'+ '</div>';
 
+			var html;
+			var commandObject = supportedCommands[i];
+			var displayText = '<span>'+ commandObject.name + '</span>';
+			if (commandObject.parameters) {
+				for (var j = 0; j < commandObject.parameters.length; j++) {
+					var parameter = commandObject.parameters[j];
+					if(parameter.text) {
+						displayText += '<span>' + parameter.text + '</span>';
+					} else if (parameter.input){
+						displayText += '<input type = "text" class="command-parameter-input" placeholder = "' + parameter.default + '">';
+					}
+				}
+			}
+			html = '<div class = "'+ classKeyword +'" draggable = "true" style="width:100%">' + '<div class = "command-btn" >' + displayText + '</div>'+ '</div>';
 			//box-shadow: inset 1px 1px 0 rgba(0,0,0,0.1),inset 0 -1px 0 rgba(0,0,0,0.07);	
-			var domNode = $(command)[0];
+			var domNode = $(html);
+			if (commandObject.block) {
+				domNode.children().append('<span>{</span><div class = "command-block" style = "margin-left:10%"></div><span>}</span>');
+				domNode[0].dataset.hasBlock= true;
+			}
 			$(menduWindow).append(domNode);
-						domNode.dataset.command = JSON.stringify(supportedCommands[i]);	
-
+			domNode[0].dataset.commandName = JSON.stringify(commandObject.name);	
+			
 		}
 
 		$(window.self).on("resize scroll", resizeThrottler);
@@ -64,6 +84,22 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 		e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
 		return false;
 	}
+	function handleDropInBlock(e) {
+		 if (e.stopPropagation) {
+	   		e.stopPropagation(); // Stops some browsers from redirecting.
+	  	}	
+	    // Set the source column's HTML to the HTML of the column we dropped on.
+	    var content = e.dataTransfer.getData('text/html');
+	    if(!content) {
+	    	return false;
+	    }
+	    var newElement = $(content);
+	    if (newElement[0].dataset.hasBlock) {
+		    newElement[0].addEventListener('drop', handleDropInBlock, false);
+		}
+	    $(this).children().children('.command-block').append(newElement);
+  		return false;
+	}
 	function handleDrop(e) {
 
 	    if (e.stopPropagation) {
@@ -71,7 +107,14 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 	  	}	
 	    // Set the source column's HTML to the HTML of the column we dropped on.
 	    var content = e.dataTransfer.getData('text/html');
-	    $(this).append(content);
+	    if (!content) {
+	    	return false;
+	    }
+	    var newElement = $(content);
+	    if (newElement[0].dataset.hasBlock) {
+		    newElement[0].addEventListener('drop', handleDropInBlock, false);
+		}
+	    $(this).append(newElement);
   		return false;
 	}
 	//
@@ -82,7 +125,7 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 		//	item.addEventListener('dragenter', handleDragEnter, false);
 		//	item.addEventListener('dragleave', handleDragLeave, false);
 		});
-		document.addEventListener('dragover', handleDragOVer, false);
+		rootContainer[0].addEventListener('dragover', handleDragOVer, false);
 		$(editorWindow)[0].addEventListener('drop', handleDrop, false);
 	}
 	initial(rootDom);

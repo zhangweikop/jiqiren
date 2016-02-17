@@ -17,7 +17,7 @@ function robotMonitorView(root, r, c, x, y) {
 //beresponsible for the databinding between the property and the dom element
 
 robotMonitorView.prototype.CreateCharacter = function(){};
-robotMonitorView.prototype.MoveDown = function(cb){
+robotMonitorView.prototype.MoveRight = function(cb){
 	var that = this;
 	if (this.x + 1 < this.c) {
 		this.view.MoveElementInsideBoard(this.x + 1, this.y, 'robot', 1000, function() {
@@ -31,7 +31,7 @@ robotMonitorView.prototype.MoveDown = function(cb){
 	}
 };
 
-robotMonitorView.prototype.MoveUp = function(cb){
+robotMonitorView.prototype.MoveLeft = function(cb){
 	var that = this;
 	if (this.x - 1 >= 0) {
 		this.view.MoveElementInsideBoard(this.x - 1, this.y, 'robot', 1000, function() {
@@ -45,7 +45,7 @@ robotMonitorView.prototype.MoveUp = function(cb){
 	}
 };
 
-robotMonitorView.prototype.MoveLeft = function(cb){
+robotMonitorView.prototype.MoveUp = function(cb){
 	var that = this;
 	if (this.y - 1 >= 0) {
 		this.view.MoveElementInsideBoard(this.x, this.y - 1,'robot', 1000, function() {
@@ -59,7 +59,7 @@ robotMonitorView.prototype.MoveLeft = function(cb){
 	}
 };
 
-robotMonitorView.prototype.MoveRight = function(cb){
+robotMonitorView.prototype.MoveDown = function(cb){
 	var that = this;
 	if (this.y + 1 < this.r) {
 		this.view.MoveElementInsideBoard(this.x, this.y + 1,'robot', 1000, function() {
@@ -73,7 +73,7 @@ robotMonitorView.prototype.MoveRight = function(cb){
 	}
 };
 function RobotMonitorViewController(){
-	this.viewController = new robotMonitorView('#robot-playground', 6, 8, 2, 1);
+	this.viewController = new robotMonitorView('#robot-playground', 6, 8, 2, 3);
 	//this.execution = new ExecutionService(this.viewController);
 }
 
@@ -108,18 +108,22 @@ function ExecutionService(runtime){
 	driver.functions.MoveDown = { name: 'MoveDown', function: function (cb) {runtime.MoveDown(cb);}};
 	driver.functions.MoveLeft = { name: 'MoveLeft', function: function (cb) {runtime.MoveLeft(cb);}};
 	driver.functions.MoveRight = { name: 'MoveRight', function: function (cb) {runtime.MoveRight(cb);}};
-
+	driver.flowControl.for = {name: 'loop', parameters: [{input: 'numeric', default: 0}, {text: 'to'}, {input: 'numeric', default: 1}], block: '{}'};
 	var supportedCommands= [];
 
 	for (var key in driver.functions) {
 		if (driver.functions.hasOwnProperty(key)) {
 			var value = driver.functions[key];
-			if (value.name) {
-				var supportCommand = {name : value.name, function: value.function};
-				supportedCommands.push(supportCommand);
-			}
+			supportedCommands.push(value);
 		}
 	}
+	for (var key in driver.flowControl) {
+		if (driver.flowControl.hasOwnProperty(key)) {
+			var value = driver.flowControl[key];
+			supportedCommands.push(value);
+		}
+	}
+
 	this.commandCenter = new commandCenter();
 	this.driver = driver;
 	

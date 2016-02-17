@@ -10,39 +10,80 @@ function loadProgramFromDom (rootDom, porgramLoader) {
 		}
 		return '';
 	}
-	function buildBlock(domNode, classKeyword) {
+
+	function buildBlock(currentPorgramLoader, domNode, firstClassKeyword, blockClassKeyword) {
 		var blocks = [];
 		var line = '';
 		var command;
 		var statement;
-		if (domNode.className.indexOf(classKeyword) < 0) {
+		var commandName;
+		if (domNode.className.indexOf(firstClassKeyword) < 0) {
 			return;
 		} else {
-			var commandName = JSON.parse(domNode.dataset.command).name;
+			commandName = JSON.parse(domNode.dataset.commandName);
+		}
+
+		var bodyBlock = $(domNode).children(blockClassKeyword)[0];
+		if (bodyBlock) {
+			var lines = [];
+			for (var i = 0; i < bodyBlock.children.length; i++) {
+				var child = bodyBlock.children[i];
+				lines.push(buildBlock(currentPorgramLoader, child, firstClassKeyword, blockClassKeyword));
+			}
+			var bodyFunction = function () {
+				for (var i = 0; i < lines.length; i++) {
+					lines[i]();
+				}
+			};
+			return bodyFunction;
+		} else {
+			return function() {currentPorgramLoader.nextBlock(commandName, parameters);};
+		}
+	}
+
+	function buildStatement(currentPorgramLoader, domNode, firstClassKeyword, blockClassKeyword) {
+		var blocks = [];
+		var line = '';
+		var command;
+		var statement;
+		var commandName;
+		if (domNode.className.indexOf(firstClassKeyword) < 0) {
+			return;
+		} else {
+			commandName = JSON.parse(domNode.dataset.commandName);
 		}
 
 		var parameters = {};
 		if (commandName.indexOf('for')>-1) {
-			parameters.conditionCb = function(stack, N, robot) {
-				stack.i < N;
+			var N = 4;
+			parameters.preBody = function(onFinished, stack) {
+				if(stack.i && stack.i >= N) {
+					onFinished();
+				};
 			}
-		}
-		if (domNode.children.length > 0) {
-			parameters.functionBody = function() {
-				for (var i = 0; i < domNode.children.length; i++) {
-					var child = domNode.children[i];
-					buildBlock(child, classKeyword);
+			parameters.postBody = function(onFinished, stack) {
+				if(stack.i) {
+					stack.i=1;
+				}else {
+					stack.i++;
 				}
 			}
 		}
-		porgramLoader.nextBlock(commandName, parameters);		
+		var bodyNode = $(domNode).children(blockClassKeyword)[0];
+		if (bodyNode) {
+			var subLoader = new programLoader(currentPorgramLoader.commandCenter, currentPorgramLoader.pid, currentPorgramLoader.driver);
+
+			parameters.functionBody = buildBlock(subLoader, bodyNode, firstClassKeyword, blockClassKeyword);
+		}
+		currentPorgramLoader.nextBlock(commandName, parameters);		
 	}
 
 	function buildProgram() {
 		var root = $(rootDom)[0];
-		var classKeyword = root.dataset.classKeyword;
+		var firstClassKeyword = root.dataset.firstClassKeyword;
+		var blockClassKeyword = root.dataset.blockClassKeyword;
 		for (var i = 0; i < root.children.length; i++) {
-			buildBlock(root.children[i],  classKeyword);
+			buildStatement(currentPorgramLoader, root.children[i],  firstClassKeyword, blockClassKeyword);
 		}
 	}
 	

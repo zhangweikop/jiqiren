@@ -46,14 +46,14 @@ body{
  .row ::-webkit-scrollbar-thumb{background:#ccc}
  .row ::-webkit-scrollbar-thumb:hover{background:#777}.yt-scrollbar-dark ::-webkit-scrollbar{width:10px;height:9px}.yt-scrollbar-dark ::-webkit-scrollbar-track{border-left-color:#434343;background:#434343;-webkit-box-shadow:inset 0 0 1px #434343}.yt-scrollbar-dark ::-webkit-scrollbar-thumb{border-left-color:#8e8e8e;background:#8e8e8e}.yt-scrollbar-dark ::-webkit-scrollbar-track:hover{-webkit-box-shadow:inset 0 0 1px #000}.yt-scrollbar-dark ::-webkit-scrollbar-thumb:hover{background:#1b1b1b}.yt-scrollbar-wide ::-webkit-scrollbar{width:18px}
 
-a.command-btn:hover{
+.command-btn:hover{
 	background-color: rgba(158,158,158,0.2);
 	cursor: pointer;
 	text-decoration: none;
 	
 }
 
-a.command-btn:active{
+.command-btn:active{
 	color: rgb(59, 120, 231);
 	background-color:rgba(59, 120, 231, 0.2);
 	cursor: move;
@@ -79,4 +79,14 @@ a.command-btn:active{
 	width: 100%;
     text-align: left;
     padding: 0 8px;
+}
+
+.command-parameter-input{
+    font-weight: 400;
+    letter-spacing: .01em;
+    line-height: 24px;
+    border: none;
+    padding: 0;
+    margin: 0 4px;
+    width: 40px;
 }

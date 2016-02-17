@@ -1,8 +1,8 @@
 // commandTask definition
 // each commandTask has name, and cb which is the function body,and parameters
-function commandTask (pid, name, cb, parameters) {
+function commandTask (pid, name, block, parameters) {
 	this.name = name;
-	this.cb = cb;
+	this.block = block;
 	this.parameters = parameters;
 	this.status = '';
 	this.id = -1;
@@ -10,9 +10,9 @@ function commandTask (pid, name, cb, parameters) {
 	this.commandCenter = null;
 	var that = this;
 	this.onFinished = function() {
-					that.status = 'finished';
-					that.commandCenter.finishCommandTask(that.pid);
-				};
+		that.status = 'finished';
+		that.commandCenter.finishCommandTask(that.pid);
+	};
 }
 
 commandTask.prototype.execute = function () {
@@ -21,28 +21,38 @@ commandTask.prototype.execute = function () {
 	if (this.status !== 'running') {
 		if (!hasDependency) {
 			this.status = 'running';
-			this.cb(that.onFinished);
+			this.block(that.onFinished);
 		}
 	}
 }
+
+function stackTask(pid, name, cb, parameters) {
+	this.body = {};
+
+}
+
 
 // commandCenter which has a event Loop
 function commandCenter() {
 	this.activePool = [];
 	this.waitPool = [];
-	this.programCounter = [];
 	this.eventLoopInterval = 10;
 }
 
-commandCenter.prototype.addNewCommandTask = function (pid, commandTask) {
+commandCenter.prototype.reset = function () {
+	this.activePool = [];
+	this.waitPool = [];	
+
+}
+
+commandCenter.prototype.addNewCommandTask = function (pid, address, commandTask) {
 	commandTask.commandCenter = this;
 	commandTask.status = 'wait';
 	if(!this.waitPool[pid]) {
 		this.waitPool[pid] = [commandTask];
 		this.activePool[pid] = null;
-		this.programCounter[pid] = 0;
 	} else {
-		this.waitPool[pid].push(commandTask);
+		this.waitPool[pid].splice(address, 0, commandTask);
 	}	
 };
 
@@ -56,10 +66,8 @@ commandCenter.prototype.EventLoop = function () {
 		if (commandTask) {
 			commandTask.execute();
 		} else {
-			var pc = this.programCounter[i];
-			var candidateTask = this.waitPool[i][pc];
+			var candidateTask = this.waitPool[i].shift();
 			if (candidateTask) {
-				this.programCounter[i]++;
 				this.activePool[i] = candidateTask;
 			}	
 		}
@@ -70,11 +78,11 @@ commandCenter.prototype.EventLoop = function () {
 }
 
 
-function programLoader(commandCenter, pid, driver) {
+function programLoader(commandCenter, pid, driver, address) {
 	this.driver = driver;
 	this.commandCenter = commandCenter;
 	this.pid = pid;
-
+	this.address = address || 0;
 }
 
 programLoader.prototype.nextBlock = function (statement, parameters) {
@@ -82,20 +90,58 @@ programLoader.prototype.nextBlock = function (statement, parameters) {
 		this.next(statement);
 	} else if (this.driver.flowControl.hasOwnProperty(statement)){
 		if (statement.indexOf('for')>-1) {
-			this.nextN(parameters.conditionCb, parameters.loopBody);
+			var loopBody = function () {
+				statement();
+			};
+			this.next(loopBody);
+
+
+			if (parameters.preBody) {
+
+			}
+			if (parameters.functionBody) {
+				var subLoader = new programLoader(this.commandCenter, this.pid, this.driver);
+				
+			}
+			if (parameters.postBody) {
+				
+			}
+
+
 		}
 	}
 }
 programLoader.prototype.next = function (instructionName) {
-	var instruction = this.driver.functions[instructionName];
+	var functionBody;
 	var task;
-	if (instruction) {
-		task = new commandTask(this.pid, instruction.name, instruction.function);
-		this.commandCenter.addNewCommandTask(this.pid, task);
+	if(typeof instructionName === 'string') {
+		functionBody = this.driver.functions[instructionName];
+		if (functionBody) {
+			task = new commandTask(this.pid, instruction.name, instruction.function);
+			this.commandCenter.addNewCommandTask(this.pid, this.address, task);
+			thhis.address++;
+			return true;
+		}
+	} else if (typeof instructionName === 'function'){
+		// the definition of functionBody is like 
+		// function foo(onFinished) { 
+		//	...
+		//  onFinished();															
+		// }
+		functionBody = instructionName;
+		task = new commandTask(this.pid, 'function', functionBody);
+		this.commandCenter.addNewCommandTask(this.pid, this.address, task);
+		this.address++;
 		return true;
 	}
 	return false;
 };
 programLoader.prototype.nextN = function (conditionCb, loopBody) {
 //todo
+	if (loopBody) {
+		var task = new commandTask(this.pid, 'for', function() {buildProgram});
+		this.commandCenter.addNewCommandTask(this.pid, task);
+		return true;
+	}
+	return false;
 };
