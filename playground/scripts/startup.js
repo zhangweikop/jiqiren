@@ -95,9 +95,9 @@ window.WebApplication = window.WebApplication||{};
 // and send data to each other
 function loadService(programWindowViewController, ExecutionService) {
 	this.rootDom = $('.'+programWindowViewController.programEditor)[0]; 
-	this.programLoader  = new programLoader(ExecutionService.commandCenter , 0, ExecutionService.driver);
+	this.runTimeEnvironment  = new runTimeEnvironment(ExecutionService.commandCenter , 0, ExecutionService.driver);
 
-	this.load = loadProgramFromDom(this.rootDom, this.programLoader).loadProgram;
+	this.load = loadProgramFromDom(this.rootDom, this.runTimeEnvironment).loadProgram;
 
 }
 function ExecutionService(runtime){
@@ -135,12 +135,12 @@ $(document).ready(function(){
 	 var robotMonitorViewController = new RobotMonitorViewController();
 	 var localExecutionService = new ExecutionService(robotMonitorViewController.viewController);
 	 var programController = new ProgramWindowViewController(localExecutionService);
-	 var programLoader = new loadService(programController, localExecutionService);
+	 var environment = new loadService(programController, localExecutionService);
 
 	 WebApplication.boardController = robotMonitorViewController;
 	 WebApplication.programController = programController;
 	 $('#run-button').click(function() {
-	 	programLoader.load();
+	 	environment.load();
 	 	localExecutionService.commandCenter.EventLoop();
 	 });
 	setTimeout(function(){

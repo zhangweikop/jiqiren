@@ -1,81 +1,69 @@
 
 
-function loadProgramFromDom (rootDom, porgramLoader) {
+function loadProgramFromDom (rootDom, runTimeEnvironment) {
 	var program = {};
 
 	function buildParameter(command) {
-		var parameters = command.parameters;
-		if (parameters.length > 0) {
-			throw "error when building parameters";
-		}
-		return '';
+	
 	}
 
-	function buildBlock(currentPorgramLoader, domNode, firstClassKeyword, blockClassKeyword) {
-		var blocks = [];
-		var line = '';
+	function buildStatement(domNode, firstClassKeyword, blockClassKeyword) {
 		var command;
-		var statement;
-		var commandName;
 		if (domNode.className.indexOf(firstClassKeyword) < 0) {
 			return;
 		} else {
-			commandName = JSON.parse(domNode.dataset.commandName);
-		}
-
-		var bodyBlock = $(domNode).children(blockClassKeyword)[0];
-		if (bodyBlock) {
-			var lines = [];
-			for (var i = 0; i < bodyBlock.children.length; i++) {
-				var child = bodyBlock.children[i];
-				lines.push(buildBlock(currentPorgramLoader, child, firstClassKeyword, blockClassKeyword));
-			}
-			var bodyFunction = function () {
-				for (var i = 0; i < lines.length; i++) {
-					lines[i]();
-				}
-			};
-			return bodyFunction;
-		} else {
-			return function() {currentPorgramLoader.nextBlock(commandName, parameters);};
-		}
-	}
-
-	function buildStatement(currentPorgramLoader, domNode, firstClassKeyword, blockClassKeyword) {
-		var blocks = [];
-		var line = '';
-		var command;
-		var statement;
-		var commandName;
-		if (domNode.className.indexOf(firstClassKeyword) < 0) {
-			return;
-		} else {
-			commandName = JSON.parse(domNode.dataset.commandName);
+			command = JSON.parse(domNode.dataset.commandName);
 		}
 
 		var parameters = {};
-		if (commandName.indexOf('for')>-1) {
-			var N = 4;
-			parameters.preBody = function(onFinished, stack) {
-				if(stack.i && stack.i >= N) {
-					onFinished();
-				};
-			}
-			parameters.postBody = function(onFinished, stack) {
-				if(stack.i) {
-					stack.i=1;
-				}else {
-					stack.i++;
-				}
-			}
-		}
-		var bodyNode = $(domNode).children(blockClassKeyword)[0];
-		if (bodyNode) {
-			var subLoader = new programLoader(currentPorgramLoader.commandCenter, currentPorgramLoader.pid, currentPorgramLoader.driver);
+		var bodyNode = $(domNode).children('.'+blockClassKeyword)[0];
 
-			parameters.functionBody = buildBlock(subLoader, bodyNode, firstClassKeyword, blockClassKeyword);
+		var lines = [];
+		var bodyFunction;
+		if (bodyNode) {
+			for (var i = 0; i < bodyNode.children.length; i++) {
+				var child = bodyNode.children[i];
+				lines.push(buildStatement(child, firstClassKeyword, blockClassKeyword));
+			}
+			bodyFunction = function (onFinished, environment) {
+				for (var i = 0; i < lines.length; i++) {
+					lines[i](environment);
+				}
+			};
 		}
-		currentPorgramLoader.nextBlock(commandName, parameters);		
+
+		if (command.indexOf('loop')>-1 && !!bodyFunction) {
+			var N = 3;
+			var scopeBody = bodyFunction;
+			var next = function (onFinished, runTimeEnvironment, stack) {
+				
+				runTimeEnvironment.next(function(end) {
+					
+					if(stack.i === undefined || stack.i === null){
+						stack.i = 0;
+					}
+					if (stack.i < N) {
+						 scopeBody(null, runTimeEnvironment);
+					}
+					end();
+				});
+				
+				runTimeEnvironment.next(function(end) {
+					if (stack.i === undefined || stack.i === null) {
+						stack.i = 0;
+					}
+					stack.i++;
+					end();
+					if (stack.i >= N) {
+						onFinished();
+					}
+				});
+				return 'continue';
+			}
+			command = next;
+		}
+		
+		return function(environment){environment.nextBlock(command, parameters);};		
 	}
 
 	function buildProgram() {
@@ -83,12 +71,12 @@ function loadProgramFromDom (rootDom, porgramLoader) {
 		var firstClassKeyword = root.dataset.firstClassKeyword;
 		var blockClassKeyword = root.dataset.blockClassKeyword;
 		for (var i = 0; i < root.children.length; i++) {
-			buildStatement(currentPorgramLoader, root.children[i],  firstClassKeyword, blockClassKeyword);
+			buildStatement(root.children[i],  firstClassKeyword, blockClassKeyword)(runTimeEnvironment);
 		}
 	}
 	
 	return {
-		porgramLoader: porgramLoader,
+		currentEnvironment: runTimeEnvironment,
 		loadProgram: buildProgram,
 	};
 }

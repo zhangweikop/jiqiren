@@ -34,11 +34,13 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 					}
 				}
 			}
-			html = '<div class = "'+ classKeyword +'" draggable = "true" style="width:100%">' + '<div class = "command-btn" >' + displayText + '</div>'+ '</div>';
+			//html = '<div class = "'+ classKeyword +'" draggable = "true" style="width:100%">' + '<div class = "command-btn" >' + displayText + '</div>'+ '</div>';
+
+			 html = '<div class =" command-btn  '+ classKeyword +'" draggable = "true" style="width:100%">' + displayText +  '</div>';
 			//box-shadow: inset 1px 1px 0 rgba(0,0,0,0.1),inset 0 -1px 0 rgba(0,0,0,0.07);	
 			var domNode = $(html);
 			if (commandObject.block) {
-				domNode.children().append('<span>{</span><div class = "command-block" style = "margin-left:10%"></div><span>}</span>');
+				domNode.append('<span>{</span><div class = "command-block" style = "margin-left:10%"></div><span>}</span>');
 				domNode[0].dataset.hasBlock= true;
 			}
 			$(menduWindow).append(domNode);
@@ -97,7 +99,7 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 	    if (newElement[0].dataset.hasBlock) {
 		    newElement[0].addEventListener('drop', handleDropInBlock, false);
 		}
-	    $(this).children().children('.command-block').append(newElement);
+	    $(this).children('.command-block').append(newElement);
   		return false;
 	}
 	function handleDrop(e) {

@@ -1,75 +1,120 @@
 // commandTask definition
 // each commandTask has name, and cb which is the function body,and parameters
-function commandTask (pid, name, block, parameters) {
+function commandTask (pid, name, fun, runTimeEnvironment) {
 	this.name = name;
-	this.block = block;
-	this.parameters = parameters;
+	this.fun = fun;
 	this.status = '';
 	this.id = -1;
 	this.pid = pid;
 	this.commandCenter = null;
 	var that = this;
 	this.onFinished = function() {
-		that.status = 'finished';
-		that.commandCenter.finishCommandTask(that.pid);
+		that.finish();
+		//that.commandCenter.finishCommandTask(that.pid, that);
 	};
+	this.environment =  runTimeEnvironment;
+
+}
+commandTask.prototype.isRunning = function() {
+	return (this.status === 'running') || (this.status === 'ready');
+}
+commandTask.prototype.isActive = function() {
+	return (this.status !== 'finished');
+};
+
+commandTask.prototype.finish = function (stack) {
+	this.status = 'finished';
 }
 
-commandTask.prototype.execute = function () {
+commandTask.prototype.run = function (stack) {
 	var that = this;
 	var hasDependency = false;
 	if (this.status !== 'running') {
 		if (!hasDependency) {
 			this.status = 'running';
-			this.block(that.onFinished);
+			var loader = new runTimeEnvironment(that.commandCenter, that.environment.pid, that.environment.driver); 
+			var status = this.fun(that.onFinished, loader, stack);
+			if (status) {
+				this.status = 'ready';
+			}
 		}
 	}
 }
 
-function stackTask(pid, name, cb, parameters) {
-	this.body = {};
-
-}
-
-
 // commandCenter which has a event Loop
 function commandCenter() {
-	this.activePool = [];
-	this.waitPool = [];
+	this.commandQueue = [];
+	this.stack = [];
 	this.eventLoopInterval = 10;
 }
 
 commandCenter.prototype.reset = function () {
-	this.activePool = [];
-	this.waitPool = [];	
+	this.commandQueue = [];
+	this.stack = [];
+}
 
+commandCenter.prototype.queueNewCommandTask = function (pid, commandTask) {
+	commandTask.commandCenter = this;
+	commandTask.status = 'created';
+	if(!this.commandQueue[pid]) {
+		this.commandQueue[pid] = [commandTask];
+	} else {
+		this.commandQueue[pid].push(commandTask);
+	}
+	if (!this.stack[i]) {
+		this.stack[i] = [];
+	}	
 }
 
 commandCenter.prototype.addNewCommandTask = function (pid, address, commandTask) {
 	commandTask.commandCenter = this;
-	commandTask.status = 'wait';
-	if(!this.waitPool[pid]) {
-		this.waitPool[pid] = [commandTask];
-		this.activePool[pid] = null;
+	commandTask.status = 'created';
+	if(!this.commandQueue[pid]) {
+		this.commandQueue[pid] = [commandTask];
 	} else {
-		this.waitPool[pid].splice(address, 0, commandTask);
+		this.commandQueue[pid].splice(address, 0, commandTask);
 	}	
+	if (!this.stack[pid]) {
+		this.stack[pid] = [];
+	}
 };
 
-commandCenter.prototype.finishCommandTask = function (pid) {
-	this.activePool[pid] = null;
+commandCenter.prototype.flushCommandTask = function (pid) {
+	if (this.commandQueue[pid]) {
+		for (var i = 0; i < this.commandQueue[pid].length; i++) { 
+			var task = this.commandQueue[pid][i];
+			if (!!task) {
+				if (!task.isActive()){
+					this.commandQueue[pid].shift();
+					this.stack[pid].pop();
+					return;
+				}
+			} else {
+				this.commandQueue[pid].shift();
+
+			}
+		}		
+	};
+
 }
 
 commandCenter.prototype.EventLoop = function () {
-	for (var i = 0; i < this.activePool.length; i++) {
-		var commandTask = this.activePool[i];
-		if (commandTask) {
-			commandTask.execute();
-		} else {
-			var candidateTask = this.waitPool[i].shift();
-			if (candidateTask) {
-				this.activePool[i] = candidateTask;
-			}	
+	for (var i = 0; i < this.commandQueue.length; i++) {
+		this.flushCommandTask(i);
+		var commandTask = this.commandQueue[i][0];
+		var stack = this.stack[i];
+		if (!!commandTask){
+			if(commandTask.isActive()) {
+				if(commandTask.isRunning()) {
+				} else {
+					var stackVar = {};
+
+					stack.push(stackVar);
+				}
+
+				commandTask.run(stack[stack.length-1]);
+
+			}
 		}
 	}
 	var that = this;
@@ -78,65 +123,52 @@ commandCenter.prototype.EventLoop = function () {
 }
 
 
-function programLoader(commandCenter, pid, driver, address) {
+// the program loader is the runtime environment/context of the command or function
+function runTimeEnvironment(commandCenter, pid, driver, address) {
 	this.driver = driver;
 	this.commandCenter = commandCenter;
 	this.pid = pid;
 	this.address = address || 0;
 }
 
-programLoader.prototype.nextBlock = function (statement, parameters) {
+runTimeEnvironment.prototype.nextBlock = function (statement, parameters) {
 	if (this.driver.functions.hasOwnProperty(statement)) {
 		this.next(statement);
-	} else if (this.driver.flowControl.hasOwnProperty(statement)){
-		if (statement.indexOf('for')>-1) {
-			var loopBody = function () {
-				statement();
-			};
-			this.next(loopBody);
+	} else if (typeof statement === 'function'){
+	
+		this.next(statement);
 
 
-			if (parameters.preBody) {
-
-			}
-			if (parameters.functionBody) {
-				var subLoader = new programLoader(this.commandCenter, this.pid, this.driver);
-				
-			}
-			if (parameters.postBody) {
-				
-			}
-
-
-		}
 	}
 }
-programLoader.prototype.next = function (instructionName) {
-	var functionBody;
+runTimeEnvironment.prototype.next = function (instruction) {
+	var foo;
 	var task;
-	if(typeof instructionName === 'string') {
-		functionBody = this.driver.functions[instructionName];
-		if (functionBody) {
-			task = new commandTask(this.pid, instruction.name, instruction.function);
+	if(typeof instruction === 'string') {
+		foo = this.driver.functions[instruction];
+		if (foo) {
+			task = new commandTask(this.pid, foo.name, foo.function, this);
 			this.commandCenter.addNewCommandTask(this.pid, this.address, task);
-			thhis.address++;
+			this.address++;
 			return true;
 		}
-	} else if (typeof instructionName === 'function'){
-		// the definition of functionBody is like 
-		// function foo(onFinished) { 
+	} else if (typeof instruction === 'function'){
+		// the definition of functionBody is like
+		// loader 
+		// function foo(onFinished, loader, stack) { 
 		//	...
 		//  onFinished();															
 		// }
-		functionBody = instructionName;
-		task = new commandTask(this.pid, 'function', functionBody);
+		foo = instruction;
+		task = new commandTask(this.pid, 'function', foo, this);
 		this.commandCenter.addNewCommandTask(this.pid, this.address, task);
 		this.address++;
 		return true;
 	}
 	return false;
 };
-programLoader.prototype.nextN = function (conditionCb, loopBody) {
+
+runTimeEnvironment.prototype.nextNdelete = function (conditionCb, loopBody) {
 //todo
 	if (loopBody) {
 		var task = new commandTask(this.pid, 'for', function() {buildProgram});
