@@ -1,8 +1,9 @@
 function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCommands){
 	var rootContainer = $(rootDom);
 	
-	var classKeyword = 'command-item';
-	var blockKeyword = 'command-block';
+	var itemClassKeyword = 'command-item';
+	var blockClassKeyword = 'command-block';
+	var parameterClassKeyword = 'command-parameter-input';
 	var menduWindow;
 	var editorWindow;
 	function initial() {
@@ -12,8 +13,9 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 	
 		menduWindow = rootContainer.find('.' + programMenu)[0];
 		editorWindow = rootContainer.find('.' + programEditor)[0];
-		editorWindow.dataset.firstClassKeyword = classKeyword;
-		editorWindow.dataset.blockClassKeyword = blockKeyword;
+		editorWindow.dataset.itemClassKeyword = itemClassKeyword;
+		editorWindow.dataset.blockClassKeyword = blockClassKeyword;
+		editorWindow.dataset.parameterClassKeyword = parameterClassKeyword;
 
 		//$(menduWindow).css({ });
 		 
@@ -30,17 +32,17 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 					if(parameter.text) {
 						displayText += '<span>' + parameter.text + '</span>';
 					} else if (parameter.input){
-						displayText += '<input type = "text" class="command-parameter-input" placeholder = "' + parameter.default + '">';
+						displayText += '<input type = "text" class="'+ parameterClassKeyword + '" placeholder = "' + parameter.default + '">';
 					}
 				}
 			}
 			//html = '<div class = "'+ classKeyword +'" draggable = "true" style="width:100%">' + '<div class = "command-btn" >' + displayText + '</div>'+ '</div>';
 
-			 html = '<div class =" command-btn  '+ classKeyword +'" draggable = "true" style="width:100%">' + displayText +  '</div>';
+			 html = '<div class =" command-btn  '+ itemClassKeyword +'" draggable = "true" style="width:100%">' + displayText +  '</div>';
 			//box-shadow: inset 1px 1px 0 rgba(0,0,0,0.1),inset 0 -1px 0 rgba(0,0,0,0.07);	
 			var domNode = $(html);
 			if (commandObject.block) {
-				domNode.append('<span>{</span><div class = "command-block" style = "margin-left:10%"></div><span>}</span>');
+				domNode.append('<span>{</span><div class = "' + blockClassKeyword + '" style = "margin-left:10%"></div><span>}</span>');
 				domNode[0].dataset.hasBlock= true;
 			}
 			$(menduWindow).append(domNode);
