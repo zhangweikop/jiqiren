@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<style>
+	#mydiv{
+		width : 64px;
+	}
+	#mydiv2{
+		width : 112px;
+		height: 112px;
+		    background-color: #ffb3b3;
+		border:8px solid #ee0000;
+	}
+	#mydivLeft {
+    background-color: #a6a6a6;
+    float: left;
+    width:  62px;
+    height: 62px;
+    border:dashed  #666;
+    border-width:  2px 0px 0px 2px ;
+}
+	#mydivRight {
+		display: none;
+  float: left;
+    background-color:  #bfbfbf;
+    width: 62px;
+    height: 62px;
+    border:dashed  #666;
+    border-width:  2px 0px 0px 2px ;
+}
+#clear {
+	clear: both;
+}
+	</style>
+	<script src="http://html2canvas.hertzen.com/build/html2canvas.js"></script>
+
+	</head>
+	<body>
+
+	<div id ='mydiv'>
+<div id="mydivLeft">
+    
+</div>
+<div id="mydivRight">
+    
+</div>
+<div id = 'clear'>
+</div>
+<div id="mydivLeftx">
+    
+</div>
+<div id="mydivRight">
+    
+</div>
+<div id = 'clear'>
+</div>
+</div>
+
+
+<div id = 'mydiv2'>
+</div>
+<br>
+<br>
+    
+<div id="canvas">
+    <p>Canvas:</p>
+    </div>
+    
+    <div id="image">
+        <p>Image:</p>
+    </div>
+    
+   
+<script>
+	html2canvas([document.getElementById('mydiv')], {
+    onrendered: function (canvas) {
+        document.getElementById('canvas').appendChild(canvas);
+        var data = canvas.toDataURL('image/png');
+        // AJAX call to send `data` to a PHP file that creates an image from the dataURI string and saves it to a directory on the server
+
+        var image = new Image();
+        image.src = data;
+        document.getElementById('image').appendChild(image);
+    }
+});
+
+
+		html2canvas([document.getElementById('mydiv2')], {
+    onrendered: function (canvas) {
+        document.getElementById('canvas').appendChild(canvas);
+        var data = canvas.toDataURL('image/png');
+        // AJAX call to send `data` to a PHP file that creates an image from the dataURI string and saves it to a directory on the server
+
+        var image = new Image();
+        image.src = data;
+        document.getElementById('image').appendChild(image);
+    }
+});
+	</script>
+	</body>
+</html>
