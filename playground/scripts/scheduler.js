@@ -141,6 +141,8 @@ runTimeEnvironment.prototype.nextBlock = function (statement, parameters) {
 
 	}
 }
+
+//Low level function used by the nextBlock function to call the underlying runtime function
 runTimeEnvironment.prototype.next = function (instruction) {
 	var foo;
 	var task;
