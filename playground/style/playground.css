@@ -43,7 +43,7 @@ canvas{
 }
 
 .lowlevel-command-editor:hover{
-	box-shadow: 0 0 5px rgba(0,0,0,0.3);
+	/*box-shadow: 0 0 5px rgba(0,0,0,0.3);*/
 }
  .row ::-webkit-scrollbar{width:9px;height:9px} 
  .row ::-webkit-scrollbar{width:9px;height:9px} 
@@ -65,6 +65,39 @@ canvas{
 .none{
 	box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
+
+.command-icon:hover{
+	background-color: rgba(158,158,158,0.2);
+
+}
+
+.command-icon:active{
+	background-color:rgba(59, 120, 231, 0.2);
+}
+
+.command-icon{
+	margin: 9px 0px 9px 0px;
+}
+.command-header{
+	user-select: none;
+	-moz-user-select: none;
+ 	-khtml-user-select: none;
+  	-webkit-user-select: none;
+    border-style: solid;
+    border-color: #b3b3b3;
+    border-width: 0 0 1px 0;
+	min-height: 36px;
+	line-height: 36px;
+	display:block;
+	color:  rgba(0, 0, 0, 0.9);
+	background-color: #ffffff;
+	text-align: center;
+	cursor: pointer;
+	text-decoration: none;
+	width: 100%;
+    padding: 0 8px;
+}
+
 .command-btn{
 	user-select: none;
 	-moz-user-select: none;
@@ -79,9 +112,9 @@ canvas{
 	color:  rgba(0, 0, 0, 0.7);
 	background-color: rgb(241, 241, 241);
 	cursor: pointer;
+	text-align: center;
 	text-decoration: none;
 	width: 100%;
-    text-align: left;
     padding: 0 8px;
 }
 

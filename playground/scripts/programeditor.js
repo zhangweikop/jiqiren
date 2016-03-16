@@ -6,6 +6,17 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 	var parameterClassKeyword = 'command-parameter-input';
 	var menduWindow;
 	var editorWindow;
+
+
+	var programMenuHeader = programMenu + '-header';
+	var programEditorHeader = programEditor + '-header';
+	function addWidownHeader(menduWindow, editorWindow) {
+		$(menduWindow).append('<div class = "command-header">Commands</div>');
+		$(editorWindow).append('<div class = "command-header"> Editor <span style= "float:right" class="toggle-editor command-icon glyphicon glyphicon-retweet" aria-hidden="true"></span></div>');
+		$(editorWindow).find('.toggle-editor').click(function() {
+			alert('refresh');
+		});
+	}
 	function initial() {
 		rootContainer.append('<div class = "' + programMenu + ' col-xs-6 col-sm-4 col-md-4"></div><div class = "' + programEditor + ' col-xs-6 col-sm-8 col-md-8"></div>');
 
@@ -13,6 +24,7 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 	
 		menduWindow = rootContainer.find('.' + programMenu)[0];
 		editorWindow = rootContainer.find('.' + programEditor)[0];
+		addWidownHeader(menduWindow, editorWindow);
 		editorWindow.dataset.itemClassKeyword = itemClassKeyword;
 		editorWindow.dataset.blockClassKeyword = blockClassKeyword;
 		editorWindow.dataset.parameterClassKeyword = parameterClassKeyword;

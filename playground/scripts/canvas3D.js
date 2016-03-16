@@ -104,16 +104,16 @@ function makeMyWorldView(rootDom, rows, columns){
 
 			canvasDom.width = canvasWidth;
 			canvasDom.height = canvasHeight;
-
 			var canvasOverlay = $(canvasDom).next()[0];
 			if (canvasOverlay) {
 				$(canvasOverlay).width(canvasWidth);
 				$(canvasOverlay).height(canvasHeight);
-				$($(canvasOverlay).children()[0]).css( "margin-top", canvasHeight/2);
+				$(canvasOverlay).css({display:"none", "padding-top": canvasHeight/2});
 			}
 			
 
 			glScene = new THREE.Scene();
+			console.log($(canvasDom).innerWidth());
 			glCamera = new THREE.PerspectiveCamera(75, $(canvasDom).innerWidth() / $(canvasDom).innerHeight() , 0.1, 20000 );
 			glCamera.position.set(0, 1200, 800);
 			glCamera.lookAt(new THREE.Vector3( 0, -100, 200));	
@@ -580,7 +580,6 @@ function makeMyWorldView(rootDom, rows, columns){
 		}
 		function main() {
 			init();
-			renderer.setPixelRatio( window.devicePixelRatio );
 
 			//glCamera.lookAt(new THREE.Vector3( 0, 0, 0 ));
 			
