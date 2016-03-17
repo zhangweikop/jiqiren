@@ -1,33 +1,71 @@
-function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCommands){
+function makeProgramWindowView(rootDom, programMenuClass, programEditorClass, supportedCommands){
 	var rootContainer = $(rootDom);
 	
 	var itemClassKeyword = 'command-item';
 	var blockClassKeyword = 'command-block';
 	var parameterClassKeyword = 'command-parameter-input';
 	var menduWindow;
-	var editorWindow;
 
+	//var programMenuHeader = programMenu + '-header';
+	//var programEditorHeader = programEditor + '-header';
+	var editorContainers = [];
 
-	var programMenuHeader = programMenu + '-header';
-	var programEditorHeader = programEditor + '-header';
-	function addWidownHeader(menduWindow, editorWindow) {
-		$(menduWindow).append('<div class = "command-header">Commands</div>');
-		$(editorWindow).append('<div class = "command-header"> Editor <span style= "float:right" class="toggle-editor command-icon glyphicon glyphicon-retweet" aria-hidden="true"></span></div>');
-		$(editorWindow).find('.toggle-editor').click(function() {
-			alert('refresh');
-		});
+	function createCommandAndTextEditorWindow() {
+		var flipClassKeyword = 'flipped';
+		var editorWindowHtml = '<div class = "compact-div css-3d-container col-xs-6 col-sm-8 col-md-8"><div class = " two-face-card"></div></div>';
+		var commandEditorHtml = '<div class = "' + programEditorClass + '"></div>';
+		var textEditorHtml = '<div class = "back-face  ' + programEditorClass + '"></div>';
+
+		var rootEditorWindow = $(editorWindowHtml)[0];
+		var commandEditorWindow = $(commandEditorHtml)[0];
+		var textEditorWindow = $(textEditorHtml)[0];
+		textEditorWindow.dataset.editorType = 'text';
+		textEditorWindow.dataset.editorActive = '-1';
+		commandEditorWindow.dataset.editorActive = '1';
+		commandEditorWindow.dataset.editorType = 'command';
+		$(rootEditorWindow.firstElementChild).append(commandEditorWindow);
+		$(rootEditorWindow.firstElementChild).append(textEditorWindow);
+		$(commandEditorWindow).append('<div class = "command-header">Command Editor <span style= "float:right" class="toggle-editor command-icon glyphicon glyphicon-retweet" aria-hidden="true"></span></div>');
+		$(textEditorWindow).append('<div class = "command-header">Text Editor <span style= "float:right" class="toggle-editor command-icon glyphicon glyphicon-retweet" aria-hidden="true"></span></div>');
+
+		var toggleEditor = function() {	
+			$(commandEditorWindow).parent('.two-face-card').toggleClass(flipClassKeyword);
+			commandEditorWindow.dataset.editorActive = 0 - parseFloat(commandEditorWindow.dataset.editorActive);
+			textEditorWindow.dataset.editorActive = 0 - parseFloat(textEditorWindow.dataset.editorActive);
+		}
+		$(commandEditorWindow).find('.toggle-editor').click(toggleEditor);
+		$(textEditorWindow).find('.toggle-editor').click(toggleEditor);
+
+		commandEditorWindow.dataset.itemClassKeyword = itemClassKeyword;
+		commandEditorWindow.dataset.blockClassKeyword = blockClassKeyword;
+		commandEditorWindow.dataset.parameterClassKeyword = parameterClassKeyword;
+
+		//not necessary, can be deleted later
+		textEditorWindow.dataset.itemClassKeyword = itemClassKeyword;
+		textEditorWindow.dataset.blockClassKeyword = blockClassKeyword;
+		textEditorWindow.dataset.parameterClassKeyword = parameterClassKeyword;
+
+		editorContainers.push({commandEditor: commandEditorWindow, textEditor: textEditorWindow});
+		return rootEditorWindow;
+	}
+	function addWidownHeader(menduWindow, commandEditorWindow) {
+		//$(menduWindow).append('<div class = "command-header">Commands</div>');
+		//$(commandEditorWindow).append('<div class = "command-header"> Editor <span style= "float:right" class="toggle-editor command-icon glyphicon glyphicon-retweet" aria-hidden="true"></span></div>');
+		
 	}
 	function initial() {
-		rootContainer.append('<div class = "' + programMenu + ' col-xs-6 col-sm-4 col-md-4"></div><div class = "' + programEditor + ' col-xs-6 col-sm-8 col-md-8"></div>');
+		rootContainer.append('<div class = "compact-div col-xs-6 col-sm-4 col-md-4"><div class = "'+ programMenuClass +'"></div></div>');
 
 		rootContainer.css({'height' : (window.self.innerHeight-rootContainer[0].getBoundingClientRect().top) + 'px'});
-	
-		menduWindow = rootContainer.find('.' + programMenu)[0];
-		editorWindow = rootContainer.find('.' + programEditor)[0];
-		addWidownHeader(menduWindow, editorWindow);
-		editorWindow.dataset.itemClassKeyword = itemClassKeyword;
-		editorWindow.dataset.blockClassKeyword = blockClassKeyword;
-		editorWindow.dataset.parameterClassKeyword = parameterClassKeyword;
+		
+		menduWindow = rootContainer.find('.' + programMenuClass)[0];
+		$(menduWindow).append('<div class = "command-header">Commands</div>');
+
+
+		var rootEditorWindow = createCommandAndTextEditorWindow();
+		rootContainer.append(rootEditorWindow);
+		rootContainer[0].dataset.programEditorClass = programEditorClass;
+		
 
 		//$(menduWindow).css({ });
 		 
@@ -142,11 +180,14 @@ function makeProgramWindowView(rootDom, programMenu, programEditor, supportedCom
 		//	item.addEventListener('dragleave', handleDragLeave, false);
 		});
 		rootContainer[0].addEventListener('dragover', handleDragOVer, false);
-		$(editorWindow)[0].addEventListener('drop', handleDrop, false);
+		$('.'+ programEditorClass).each(function(){
+			this.addEventListener('drop', handleDrop, false);
+		}) 
 	}
 	initial(rootDom);
 	bindDragDropEvents();
 	return {
-		rootElement: rootDom
+		rootElement: rootDom,
+		editorWindowContainers: editorContainers
 	};
 }

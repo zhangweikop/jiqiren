@@ -74,13 +74,29 @@ function loadProgramFromDom (rootDom, runTimeEnvironment) {
 	}
 
 	function buildProgram() {
-		var root = $(rootDom)[0];
-		var itemClassKeyword = root.dataset.itemClassKeyword;
-		var blockClassKeyword = root.dataset.blockClassKeyword;
-		var parameterClassKeyword = root.dataset.parameterClassKeyword;
 
-		for (var i = 0; i < root.children.length; i++) {
-			buildStatement(root.children[i],  itemClassKeyword, blockClassKeyword, parameterClassKeyword)(runTimeEnvironment);
+		var programEditorClass = $(rootDom)[0].dataset.programEditorClass;
+		var branches = [];
+		var roots = $(rootDom).find('.'+programEditorClass);
+		for (var i = 0; i < roots.length; i++) {
+			var root = roots[i];
+			if (root.dataset.editorActive === undefined || parseFloat(root.dataset.editorActive)>0) {
+				branches.push(root);
+			}
+		}
+		for(var i = 0; i < branches.length; i++) {
+			//TODO crate a new command branch
+			var root= branches[i];
+			var itemClassKeyword = root.dataset.itemClassKeyword;
+			var blockClassKeyword = root.dataset.blockClassKeyword;
+			var parameterClassKeyword = root.dataset.parameterClassKeyword;
+
+			for (var i = 0; i < root.children.length; i++) {
+				var statement = buildStatement(root.children[i],  itemClassKeyword, blockClassKeyword, parameterClassKeyword);
+				if (statement) { 
+					statement(runTimeEnvironment);
+				}
+			}
 		}
 	}
 	

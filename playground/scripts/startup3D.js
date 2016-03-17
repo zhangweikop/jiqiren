@@ -43,7 +43,8 @@ function programWindowView(root, programMenu, programEditor, supportedCommands) 
 function ProgramWindowViewController(executionService){
 	this.programMenu = 'lowlevel-command-gallery';
 	this.programEditor = 'lowlevel-command-editor';
-	this.view = new programWindowView('#program-editor', this.programMenu, this.programEditor, executionService.supportedCommands);
+	this.rootProgamWindowContainerID = '#program-editor';
+	this.view = new programWindowView(this.rootProgamWindowContainerID, this.programMenu, this.programEditor, executionService.supportedCommands);
 }
 
 window.WebApplication = window.WebApplication||{};
@@ -52,7 +53,7 @@ window.WebApplication = window.WebApplication||{};
 //the service will be used by the controller.the execution service will connect to the execution engine 
 // and send data to each other
 function loadService(programWindowViewController, ExecutionService) {
-	this.rootDom = $('.'+programWindowViewController.programEditor)[0]; 
+	this.rootDom = $(programWindowViewController.rootProgamWindowContainerID)[0]; 
 	this.runTimeEnvironment  = new runTimeEnvironment(ExecutionService.commandCenter , 0, ExecutionService.driver);
 
 	this.load = loadProgramFromDom(this.rootDom, this.runTimeEnvironment).loadProgram;

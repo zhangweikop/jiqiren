@@ -14,6 +14,55 @@ canvas{
 	border: 1px solid #ddd;
 	box-sizing: border-box;
 }
+.compact-div{
+	padding: 0;
+	height: 100%;
+}
+
+.css-3d-container{
+	perspective: 800px;
+	 position: relative;
+}
+.two-face-card{
+ 	width: 100%;
+	height: 100%;
+	position: relative;
+	-webkit-transition: -webkit-transform 1s;
+	 -moz-transition: -moz-transform 1s;
+	   -o-transition: -o-transform 1s;
+	      transition: transform 1s;
+	-webkit-transform-style: preserve-3d;
+	 -moz-transform-style: preserve-3d;
+	   -o-transform-style: preserve-3d;
+	      transform-style: preserve-3d;
+}
+
+.two-face-card.flipped {
+  -webkit-transform: rotateY( 180deg );
+     -moz-transform: rotateY( 180deg );
+       -o-transform: rotateY( 180deg );
+          transform: rotateY( 180deg );
+}
+
+
+.two-face-card .lowlevel-command-editor{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	  -webkit-backface-visibility: hidden;
+         -moz-backface-visibility: hidden;
+           -o-backface-visibility: hidden;
+              backface-visibility: hidden;
+}
+
+.back-face {
+ background: blue;
+  -webkit-transform: rotateY( 180deg );
+     -moz-transform: rotateY( 180deg );
+       -o-transform: rotateY( 180deg );
+          transform: rotateY( 180deg );
+ 
+}
 .lowlevel-command-editor{
 	padding: 0;
 	box-sizing: border-box;
